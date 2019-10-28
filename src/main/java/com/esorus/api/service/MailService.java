@@ -1,7 +1,10 @@
 package com.esorus.api.service;
 
 import com.esorus.api.domain.Authority;
+import com.esorus.api.domain.Configs;
+import com.esorus.api.domain.RequestForSupplier;
 import com.esorus.api.domain.User;
+import com.esorus.api.repository.ConfigsRepository;
 import com.esorus.api.repository.UserRepository;
 import com.esorus.api.security.AuthoritiesConstants;
 
@@ -51,13 +54,17 @@ public class MailService {
 
     private final SpringTemplateEngine templateEngine;
     private final UserRepository userRepository;
+    
+    private final ConfigsRepository configsRepository;
     public MailService(JHipsterProperties jHipsterProperties, JavaMailSender javaMailSender,
-            MessageSource messageSource, SpringTemplateEngine templateEngine,UserRepository userRepository) {
+            MessageSource messageSource, SpringTemplateEngine templateEngine,UserRepository userRepository,
+            ConfigsRepository configsRepository) {
     	this.userRepository = userRepository;
         this.jHipsterProperties = jHipsterProperties;
         this.javaMailSender = javaMailSender;
         this.messageSource = messageSource;
         this.templateEngine = templateEngine;
+        this.configsRepository = configsRepository;
     }
 
     @Async
@@ -92,6 +99,19 @@ public class MailService {
     }
     
     @Async
+    public void sendBuyerRequestSubmittedEmail(RequestForSupplier requestForSupplier) {
+        log.debug("Sending creation email to '{}'", requestForSupplier.getUser().getEmail());
+        byte[] fileBytes = null;
+		try {
+			Path path = Paths.get("src/main/resources/templates/images/esorus-black-logo.png");
+			fileBytes = Files.readAllBytes(path);
+		} catch (IOException e) {
+		}
+        sendEmailFromTemplate(requestForSupplier.getUser(), "mail/requestForSupplierConfirmation", "email.buyer.request.title","esorus-black",new ByteArrayResource(fileBytes));
+        sendEmailFromTemplate(requestForSupplier,configsRepository.findOneByKey("admin_email").get().getValue(), "mail/requestForSuppliarSubmitted", "email.admin.buyer.request.title","esorus-black",new ByteArrayResource(fileBytes));
+    }
+    
+    @Async
     public void sendEmailFromTemplate(User user, String templateName, String titleKey,String name,InputStreamSource imageSource) {
         Locale locale = Locale.forLanguageTag(user.getLangKey());
         Context context = new Context(locale);
@@ -104,6 +124,55 @@ public class MailService {
         try {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
             message.setTo(user.getEmail());
+            message.setFrom(jHipsterProperties.getMail().getFrom());
+            message.setSubject(subject);
+            message.setText(content, true);
+            message.addInline(name, imageSource, "image/png");
+            javaMailSender.send(mimeMessage);
+            log.debug("Sent email to User '{}'", user.getEmail());
+        }  catch (MailException | MessagingException e) {
+            log.warn("Email could not be sent to user '{}'", user.getEmail(), e);
+        }
+    }
+    
+    @Async
+    public void sendEmailFromTemplate(RequestForSupplier requestForSupplier, String to, String templateName, String titleKey,String name,InputStreamSource imageSource) {
+        Locale locale = Locale.forLanguageTag(requestForSupplier.getUser().getLangKey());
+        Context context = new Context(locale);
+        context.setVariable(USER, requestForSupplier.getUser());
+        context.setVariable(BASE_URL, jHipsterProperties.getMail().getBaseUrl());
+        context.setVariable("imageResourceName",name);
+        context.setVariable("rfs",requestForSupplier);
+        String content = templateEngine.process(templateName, context);
+        String subject = messageSource.getMessage(titleKey, null, locale);
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
+            message.setTo(to);
+            message.setFrom(jHipsterProperties.getMail().getFrom());
+            message.setSubject(subject);
+            message.setText(content, true);
+            message.addInline(name, imageSource, "image/png");
+            javaMailSender.send(mimeMessage);
+            log.debug("Sent email to User '{}'", requestForSupplier.getUser().getEmail());
+        }  catch (MailException | MessagingException e) {
+            log.warn("Email could not be sent to user '{}'", requestForSupplier.getUser().getEmail(), e);
+        }
+    }
+    
+    @Async
+    public void sendEmailFromTemplate(User user, String to, String templateName, String titleKey,String name,InputStreamSource imageSource) {
+        Locale locale = Locale.forLanguageTag(user.getLangKey());
+        Context context = new Context(locale);
+        context.setVariable(USER, user);
+        context.setVariable(BASE_URL, jHipsterProperties.getMail().getBaseUrl());
+        context.setVariable("imageResourceName",name);
+        String content = templateEngine.process(templateName, context);
+        String subject = messageSource.getMessage(titleKey, null, locale);
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
+            message.setTo(to);
             message.setFrom(jHipsterProperties.getMail().getFrom());
             message.setSubject(subject);
             message.setText(content, true);
@@ -133,6 +202,7 @@ public class MailService {
         	}
         	if(auth.getName().equals(AuthoritiesConstants.SUPPLIER)) {
         		sendEmailFromTemplate(user, "mail/activationEmailForSupplaier", "email.sup.activation.title","esorus-black",new ByteArrayResource(fileBytes));
+        		sendEmailFromTemplate(user,configsRepository.findOneByKey("admin_email").get().getValue(), "mail/supplierRegistered", "email.admin.sup.activation.title","esorus-black",new ByteArrayResource(fileBytes));
         		return;
         	}
         }

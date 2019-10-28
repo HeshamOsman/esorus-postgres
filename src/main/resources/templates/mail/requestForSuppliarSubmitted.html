@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+<title th:text="#{email.admin.buyer.request.title}">JHipster
+	activation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="shortcut icon" th:href="@{|${baseUrl}/favicon.ico|}" />
+<!-- <link href='https://fonts.googleapis.com/css?family=Quicksand' -->
+<!-- 	rel='stylesheet' type='text/css' /> -->
+<link
+	href="https://fonts.googleapis.com/css?family=Poppins&display=swap"
+	rel="stylesheet" type='text/css'>
+</head>
+<body>
+	<!--     <img src="../../images/esorus-black-logo.png" th:src="|cid:${imageResourceName}|" /> -->
+	<img src="../../images/esorus-black-logo.png"
+		th:src="|cid:${imageResourceName}|" class="logo"
+		style="height: 23px; margin-top: 5px; width: 40%; max-width: 158px;" />
+	<p th:text="#{email.admin.buyer.request.slogan}"
+		style="margin-top: 5px; padding-top: 0px; font-weight: bold;"></p>
+
+	<!--         <img src="../images/esorus-black-logo.png" width="1000" th:src="@{images/esorus-black-logo.png}"/> -->
+	<p th:text="#{email.admin.buyer.request.greeting}">Dear</p>
+	<p th:text="#{email.admin.buyer.request.first}"
+		style="font-family: 'Poppins', sans-serif;"></p>
+	<ul>
+		<li th:text="#{email.admin.buyer.request.text1(${user.email})}"
+			style="font-family: 'Poppins', sans-serif;"></li>
+		<li th:text="#{email.admin.buyer.request.text2(${rfs.projectType.slug})}"
+			style="font-family: 'Poppins', sans-serif;"></li>
+		<li th:text="#{email.admin.buyer.request.text3(${rfs.projectPhase.slug})}"
+			style="font-family: 'Poppins', sans-serif;"></li>
+		<li th:text="#{email.admin.buyer.request.text4(${rfs.typeOfWorkNeeded.slug})}"
+			style="font-family: 'Poppins', sans-serif;"></li>
+		<li  th:if= "${rfs.uploadedPic != null}" th:text="#{email.admin.buyer.request.text5(${rfs.uploadedPic.savedFileName})}"
+			style="font-family: 'Poppins', sans-serif;"></li>
+		<li th:text="#{email.admin.buyer.request.text6(${rfs.boq})}"
+			style="font-family: 'Poppins', sans-serif;"></li>
+		<li th:text="#{email.admin.buyer.request.text7(${rfs.deliveryDate})}"
+			style="font-family: 'Poppins', sans-serif;"></li>
+		<li th:text="#{email.admin.buyer.request.text8(${rfs.detailes})}"
+			style="font-family: 'Poppins', sans-serif;"></li>
+	</ul>
+	<div>
+		<span th:text="#{email.admin.buyer.request.text9}">Regards, </span> <br />
+		<p th:text="#{email.admin.buyer.request.signature}"></p>
+	</div>
+</body>
+</html>

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.esorus.api.domain.RequestForSupplier;
 import com.esorus.api.security.AuthoritiesConstants;
+import com.esorus.api.service.MailService;
 import com.esorus.api.service.RequestForSupplierService;
 import com.esorus.api.service.dto.RequestForSupplierDTO;
 
@@ -24,14 +25,18 @@ public class RequestForSupplierResource {
 	@Autowired
 	private RequestForSupplierService requestForSupplierService;
 	
+	@Autowired
+	private MailService mailService;
+	
 	@PostMapping("/request-for-supplier")
 	@PreAuthorize("hasRole(\"" + AuthoritiesConstants.PROFESSIONAL_BUYER + "\")")
 	public ResponseEntity<RequestForSupplier> saveTempraryFile(@Valid @RequestBody RequestForSupplierDTO rosDto) {
 
 			Optional<RequestForSupplier> uploadServiceResponse = requestForSupplierService.save(rosDto);
-			if (uploadServiceResponse.isPresent())
+			if (uploadServiceResponse.isPresent()) {
+				mailService.sendBuyerRequestSubmittedEmail(uploadServiceResponse.get());
 				return ResponseEntity.ok(uploadServiceResponse.get());
-			else
+			}else
 				return ResponseEntity.badRequest().build();
 		
 	}

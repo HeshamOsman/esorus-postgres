@@ -163,5 +163,23 @@
 
 
 	</changeSet>
+		<changeSet id="20191025140001-2" author="hesham">
+		<createTable tableName="configs">
+			<column name="id" type="bigint"
+				autoIncrement="${autoIncrement}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="key" type="varchar(190)">
+			<constraints nullable="false" />
+			</column>
+			<column name="value" type="varchar(255)">
+			</column>
+		</createTable>
+		<insert 
+            tableName="configs">
+        <column name="key" type="varchar(190)" value="admin_email"/>
+        <column name="value" type="varchar(255)" value="admin@esorus.com"/>
+    </insert>
+		</changeSet>
 
 </databaseChangeLog>

@@ -26,6 +26,7 @@ public class UserDTO {
     @Size(min = 1, max = 50)
     private String login;
 
+    
     @Size(max = 200)
     private String name;
 

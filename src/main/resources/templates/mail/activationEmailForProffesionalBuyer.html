@@ -24,7 +24,7 @@
 	<p th:text="#{email.buy.activation.text1}" style="font-family: 'Poppins', sans-serif;"></p>
 	<p>
 		<a
-			th:with="url=(@{|${baseUrl}/account/activate?key=${user.activationKey}|})"
+			th:with="url=(@{|${baseUrl}/dashboard/activated?key=${user.activationKey}|})"
 			th:href="${url}" th:text="${url}">Activation link</a>
 	</p>
 	<p th:text="#{email.buy.activation.second}" style="font-family: 'Poppins', sans-serif;"></p>
