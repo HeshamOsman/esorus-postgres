@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+//import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -17,6 +18,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -25,13 +27,16 @@ import java.util.Set;
 @Entity
 @Table(name = "jhi_user")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+//@org.springframework.data.elasticsearch.annotations.Document(indexName = "user")
 public class User extends AbstractAuditingEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
+//    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     @NotNull
@@ -46,15 +51,15 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(name = "password_hash", length = 60, nullable = false)
     private String password;
 
-    @Size(max = 50)
-    @Column(name = "first_name", length = 50)
+    @Size(max = 200)
+    @Column(name = "first_name", length = 200)
     private String firstName;
 
     @Size(max = 50)
     @Column(name = "last_name", length = 50)
     private String lastName;
 
-    @Email
+    @Email(regexp = Constants.EMAIL_REGEX)
     @Size(min = 5, max = 254)
     @Column(length = 254, unique = true)
     private String email;
@@ -83,7 +88,10 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     @Column(name = "reset_date")
     private Instant resetDate = null;
-
+    
+    @OneToOne(mappedBy = "user",cascade=CascadeType.ALL,fetch = FetchType.LAZY)  
+    private Company company;
+    
     @JsonIgnore
     @ManyToMany
     @JoinTable(
@@ -198,6 +206,27 @@ public class User extends AbstractAuditingEntity implements Serializable {
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
     }
+    
+    
+    
+
+    public Company getCompany() {
+		return company;
+	}
+
+	public void setCompany(Company company) {
+		if (company == null) {
+            if (this.company != null) {
+                this.company.setUser(null);
+            }
+        }
+        else {
+        	company.setUser(this);
+        }
+		this.company = company;
+	}
+
+	
 
     @Override
     public boolean equals(Object o) {
@@ -210,11 +239,13 @@ public class User extends AbstractAuditingEntity implements Serializable {
         return id != null && id.equals(((User) o).id);
     }
 
-    @Override
-    public int hashCode() {
-        return 31;
-    }
 
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
+	
+	
     @Override
     public String toString() {
         return "User{" +

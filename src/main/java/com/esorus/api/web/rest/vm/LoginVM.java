@@ -1,5 +1,6 @@
 package com.esorus.api.web.rest.vm;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -8,9 +9,12 @@ import javax.validation.constraints.Size;
  */
 public class LoginVM {
 
-    @NotNull
     @Size(min = 1, max = 50)
     private String username;
+    
+    @Email
+    @Size(min = 5, max = 254)
+    private String email;
 
     @NotNull
     @Size(min = 4, max = 100)
@@ -41,8 +45,17 @@ public class LoginVM {
     public void setRememberMe(Boolean rememberMe) {
         this.rememberMe = rememberMe;
     }
+    
+    public String getEmail() {
+		return email;
+	}
 
-    @Override
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+
+	@Override
     public String toString() {
         return "LoginVM{" +
             "username='" + username + '\'' +

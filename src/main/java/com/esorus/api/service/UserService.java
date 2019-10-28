@@ -5,10 +5,12 @@ import com.esorus.api.domain.Authority;
 import com.esorus.api.domain.User;
 import com.esorus.api.repository.AuthorityRepository;
 import com.esorus.api.repository.UserRepository;
+//import com.esorus.api.repository.search.UserSearchRepository;
 import com.esorus.api.security.AuthoritiesConstants;
 import com.esorus.api.security.SecurityUtils;
 import com.esorus.api.service.dto.UserDTO;
 import com.esorus.api.service.util.RandomUtil;
+import com.esorus.api.web.rest.errors.BadRequestAlertException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,8 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+//    private final UserSearchRepository userSearchRepository;
+
     private final AuthorityRepository authorityRepository;
 
     private final CacheManager cacheManager;
@@ -45,6 +49,7 @@ public class UserService {
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository, CacheManager cacheManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+//        this.userSearchRepository = userSearchRepository;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
     }
@@ -56,6 +61,8 @@ public class UserService {
                 // activate given user for the registration key.
                 user.setActivated(true);
                 user.setActivationKey(null);
+//                user = userRepository.save(user);
+//                userSearchRepository.save(user);
                 this.clearUserCaches(user);
                 log.debug("Activated user: {}", user);
                 return user;
@@ -87,12 +94,12 @@ public class UserService {
     }
 
     public User registerUser(UserDTO userDTO, String password) {
-        userRepository.findOneByLogin(userDTO.getLogin().toLowerCase()).ifPresent(existingUser -> {
-            boolean removed = removeNonActivatedUser(existingUser);
-            if (!removed) {
-                throw new UsernameAlreadyUsedException();
-            }
-        });
+//        userRepository.findOneByLogin(userDTO.getLogin().toLowerCase()).ifPresent(existingUser -> {
+//            boolean removed = removeNonActivatedUser(existingUser);
+//            if (!removed) {
+//                throw new UsernameAlreadyUsedException();
+//            }
+//        });
         userRepository.findOneByEmailIgnoreCase(userDTO.getEmail()).ifPresent(existingUser -> {
             boolean removed = removeNonActivatedUser(existingUser);
             if (!removed) {
@@ -101,25 +108,65 @@ public class UserService {
         });
         User newUser = new User();
         String encryptedPassword = passwordEncoder.encode(password);
-        newUser.setLogin(userDTO.getLogin().toLowerCase());
+        String userName = createUserName(userDTO.getEmail());
+        if(userName == null) {
+        	throw new UsernameAlreadyUsedException();
+        }
+        newUser.setLogin(userName.toLowerCase());
         // new user gets initially a generated password
         newUser.setPassword(encryptedPassword);
-        newUser.setFirstName(userDTO.getFirstName());
-        newUser.setLastName(userDTO.getLastName());
+        newUser.setFirstName(userDTO.getName());
+//        newUser.setLastName(userDTO.getLastName());
         newUser.setEmail(userDTO.getEmail().toLowerCase());
         newUser.setImageUrl(userDTO.getImageUrl());
-        newUser.setLangKey(userDTO.getLangKey());
+        newUser.setLangKey(userDTO.getLangKey()==null?"en":userDTO.getLangKey());
         // new user is not active
         newUser.setActivated(false);
         // new user gets registration key
         newUser.setActivationKey(RandomUtil.generateActivationKey());
+        newUser.setCompany(userDTO.getCompany());
         Set<Authority> authorities = new HashSet<>();
         authorityRepository.findById(AuthoritiesConstants.USER).ifPresent(authorities::add);
+        for(String authSlug:userDTO.getAuthorities()) {
+        	if(authSlug.equals(AuthoritiesConstants.SUPPLIER)&&
+        			(userDTO.getCompany().getUrl() == null || userDTO.getCompany().getUrl().trim().isEmpty() ||
+        					userDTO.getCompany().getDescription() == null || userDTO.getCompany().getDescription().trim().isEmpty())) {
+        		throw new InsufficientCompanyData();
+        	}
+        	authorityRepository.findById(authSlug).ifPresent(authorities::add);
+        }
+        if(authorities.size()!=2)
+        	throw new UsernameAlreadyUsedException();
+        	
         newUser.setAuthorities(authorities);
         userRepository.save(newUser);
+//        userSearchRepository.save(newUser);
         this.clearUserCaches(newUser);
         log.debug("Created Information for User: {}", newUser);
         return newUser;
+    }
+    
+    private String createUserName(String email) {
+    	String suggesteduserName = email.split("@")[0];
+    	
+    	if(userRepository.findOneByLogin(suggesteduserName).isPresent()) {
+    		return getValidUserName(suggesteduserName,0);
+    	}else {
+    		return suggesteduserName;
+    	}
+    }
+    
+    private String getValidUserName(String suggesteduserName,int suggestedNumber) {
+    	suggestedNumber += 4;
+    	
+    	while(suggestedNumber < (Integer.MAX_VALUE-8)) {
+    		if(userRepository.findOneByLogin(suggesteduserName+suggestedNumber).isPresent()) {
+    			return getValidUserName(suggesteduserName,suggestedNumber);
+    		}else {
+    			return suggesteduserName+suggestedNumber;
+    		}
+    	}
+    	return null;
     }
 
     private boolean removeNonActivatedUser(User existingUser){
@@ -135,8 +182,8 @@ public class UserService {
     public User createUser(UserDTO userDTO) {
         User user = new User();
         user.setLogin(userDTO.getLogin().toLowerCase());
-        user.setFirstName(userDTO.getFirstName());
-        user.setLastName(userDTO.getLastName());
+        user.setFirstName(userDTO.getName());
+//        user.setLastName(userDTO.getLastName());
         user.setEmail(userDTO.getEmail().toLowerCase());
         user.setImageUrl(userDTO.getImageUrl());
         if (userDTO.getLangKey() == null) {
@@ -158,6 +205,7 @@ public class UserService {
             user.setAuthorities(authorities);
         }
         userRepository.save(user);
+//        userSearchRepository.save(user);
         this.clearUserCaches(user);
         log.debug("Created Information for User: {}", user);
         return user;
@@ -181,6 +229,7 @@ public class UserService {
                 user.setEmail(email.toLowerCase());
                 user.setLangKey(langKey);
                 user.setImageUrl(imageUrl);
+//                userSearchRepository.save(user);
                 this.clearUserCaches(user);
                 log.debug("Changed Information for User: {}", user);
             });
@@ -200,8 +249,8 @@ public class UserService {
             .map(user -> {
                 this.clearUserCaches(user);
                 user.setLogin(userDTO.getLogin().toLowerCase());
-                user.setFirstName(userDTO.getFirstName());
-                user.setLastName(userDTO.getLastName());
+                user.setFirstName(userDTO.getName());
+//                user.setLastName(userDTO.getLastName());
                 user.setEmail(userDTO.getEmail().toLowerCase());
                 user.setImageUrl(userDTO.getImageUrl());
                 user.setActivated(userDTO.isActivated());
@@ -213,6 +262,7 @@ public class UserService {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .forEach(managedAuthorities::add);
+//                userSearchRepository.save(user);
                 this.clearUserCaches(user);
                 log.debug("Changed Information for User: {}", user);
                 return user;
@@ -223,6 +273,7 @@ public class UserService {
     public void deleteUser(String login) {
         userRepository.findOneByLogin(login).ifPresent(user -> {
             userRepository.delete(user);
+//            userSearchRepository.delete(user);
             this.clearUserCaches(user);
             log.debug("Deleted User: {}", user);
         });
@@ -271,10 +322,11 @@ public class UserService {
     @Scheduled(cron = "0 0 1 * * ?")
     public void removeNotActivatedUsers() {
         userRepository
-            .findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(Instant.now().minus(3, ChronoUnit.DAYS))
+            .findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(Instant.now().minus(5, ChronoUnit.DAYS))
             .forEach(user -> {
                 log.debug("Deleting not activated user {}", user.getLogin());
                 userRepository.delete(user);
+//                userSearchRepository.delete(user);
                 this.clearUserCaches(user);
             });
     }

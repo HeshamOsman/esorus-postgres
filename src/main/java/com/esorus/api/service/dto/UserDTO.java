@@ -3,11 +3,12 @@ package com.esorus.api.service.dto;
 import com.esorus.api.config.Constants;
 
 import com.esorus.api.domain.Authority;
+import com.esorus.api.domain.Company;
 import com.esorus.api.domain.User;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-
+import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.time.Instant;
 import java.util.Set;
@@ -20,18 +21,19 @@ public class UserDTO {
 
     private Long id;
 
-    @NotBlank
+//    @NotBlank
     @Pattern(regexp = Constants.LOGIN_REGEX)
     @Size(min = 1, max = 50)
     private String login;
 
-    @Size(max = 50)
-    private String firstName;
+    @Size(max = 200)
+    private String name;
 
-    @Size(max = 50)
-    private String lastName;
+//    @Size(max = 50)
+//    private String lastName;
 
-    @Email
+    @NotBlank
+    @Email(regexp = Constants.EMAIL_REGEX)
     @Size(min = 5, max = 254)
     private String email;
 
@@ -39,6 +41,10 @@ public class UserDTO {
     private String imageUrl;
 
     private boolean activated = false;
+    
+    @Valid
+    @NotNull
+    private Company company;
 
     @Size(min = 2, max = 10)
     private String langKey;
@@ -50,7 +56,7 @@ public class UserDTO {
     private String lastModifiedBy;
 
     private Instant lastModifiedDate;
-
+    @NotEmpty
     private Set<String> authorities;
 
     public UserDTO() {
@@ -60,8 +66,8 @@ public class UserDTO {
     public UserDTO(User user) {
         this.id = user.getId();
         this.login = user.getLogin();
-        this.firstName = user.getFirstName();
-        this.lastName = user.getLastName();
+        this.name = user.getFirstName();
+//        this.lastName = user.getLastName();
         this.email = user.getEmail();
         this.activated = user.getActivated();
         this.imageUrl = user.getImageUrl();
@@ -91,21 +97,23 @@ public class UserDTO {
         this.login = login;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
+    
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+    public String getName() {
+		return name;
+	}
 
-    public String getLastName() {
-        return lastName;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+//	public String getLastName() {
+//        return lastName;
+//    }
+//
+//    public void setLastName(String lastName) {
+//        this.lastName = lastName;
+//    }
 
     public String getEmail() {
         return email;
@@ -179,12 +187,20 @@ public class UserDTO {
         this.authorities = authorities;
     }
 
-    @Override
+    public Company getCompany() {
+		return company;
+	}
+
+	public void setCompany(Company company) {
+		this.company = company;
+	}
+
+	@Override
     public String toString() {
         return "UserDTO{" +
             "login='" + login + '\'' +
-            ", firstName='" + firstName + '\'' +
-            ", lastName='" + lastName + '\'' +
+            ", firstName='" + name + '\'' +
+//            ", lastName='" + lastName + '\'' +
             ", email='" + email + '\'' +
             ", imageUrl='" + imageUrl + '\'' +
             ", activated=" + activated +

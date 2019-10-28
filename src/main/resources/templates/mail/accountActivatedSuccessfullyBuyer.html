@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+<title th:text="#{email.buy.after.active.title}">JHipster
+	activation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="shortcut icon" th:href="@{|${baseUrl}/favicon.ico|}" />
+<link href='https://fonts.googleapis.com/css?family=Quicksand'
+	rel='stylesheet' type='text/css' />
+</head>
+<body>
+	<!--     <img src="../../images/esorus-black-logo.png" th:src="|cid:${imageResourceName}|" /> -->
+	<img src="../../images/esorus-black-logo.png" th:src="|cid:${imageResourceName}|" class="logo"
+		style="height: 50px; margin-top: 5px; width: 40%; max-width: 150px;" />
+	<h4 th:text="#{email.buy.after.active.slogan}"></h4>	
+	
+	<!--         <img src="../images/esorus-black-logo.png" width="1000" th:src="@{images/esorus-black-logo.png}"/> -->
+	<p th:text="#{email.buy.after.active.greeting}">Dear</p>
+	<p th:text="#{email.buy.after.active.first}"></p>
+	<p th:text="#{email.buy.after.active.second}"></p>
+	<p th:text="#{email.buy.after.active.text1}"></p>
+	<p>
+		<span th:text="#{email.buy.after.active.text2}">Regards, </span> <br />
+		<em th:text="#{email.buy.after.active.signature}">JHipster.</em>
+	</p>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<property name="autoIncrement" value="true" />
+	<property name="blob_type" value="bytea" dbms="postgresql" />
+	<property name="blob_type" value="blob" dbms="oracle" />
+	<property name="blob_type" value="blob" dbms="mariadb" />
+	<changeSet id="20191025140001-1" author="hesham">
+
+
+		<createTable tableName="company">
+			<column name="id" type="bigint"
+				autoIncrement="${autoIncrement}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="varchar(1000)" />
+			<column name="url" type="varchar(255)" />
+			<column name="user_id" type="bigint">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseColumnNames="user_id" baseTableName="company"
+			constraintName="fk_company_user_id" referencedColumnNames="id"
+			referencedTableName="jhi_user" />
+
+		<createTable tableName="project_phase">
+			<column name="id" type="bigint"
+				autoIncrement="${autoIncrement}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+			</column>
+			<column name="slug" type="varchar(190)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<loadData file="config/liquibase/data/project_phase.csv"
+			separator=";" tableName="project_phase" />
+
+		<createTable tableName="project_type">
+			<column name="id" type="bigint"
+				autoIncrement="${autoIncrement}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+			</column>
+			<column name="slug" type="varchar(190)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<loadData file="config/liquibase/data/project_type.csv"
+			separator=";" tableName="project_type" />
+
+		<createTable tableName="type_of_work_needed">
+			<column name="id" type="bigint"
+				autoIncrement="${autoIncrement}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+			</column>
+			<column name="slug" type="varchar(190)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<loadData file="config/liquibase/data/type_of_work.csv"
+			separator=";" tableName="type_of_work_needed" />
+
+		<createTable tableName="uploads">
+			<column name="id" type="bigint"
+				autoIncrement="${autoIncrement}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="content" type="${blob_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="upload_date" type="timestamp">
+			</column>
+			<column name="data_type" type="varchar(50)">
+			</column>
+			<column name="file_name" type="varchar(190)" />
+			<column name="file_type" type="varchar(190)" />
+			<column name="saved_file_name" type="varchar(190)" />
+			<column name="user_id" type="bigint">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseColumnNames="user_id" baseTableName="uploads"
+			constraintName="fk_uploads_user_id" referencedColumnNames="id"
+			referencedTableName="jhi_user" />
+
+		<createTable tableName="request_for_supplier">
+			<column name="id" type="bigint"
+				autoIncrement="${autoIncrement}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="user_id" type="bigint">
+				<constraints nullable="false" />
+			</column>
+			<column name="type_of_work_id" type="bigint">
+			</column>
+			<column name="project_type_id" type="bigint">
+			</column>
+			<column name="project_phase_id" type="bigint">
+			</column>
+			<column name="pic_uplaods_id" type="bigint">
+			</column>
+			<column name="boq_uplaods_id" type="bigint">
+			</column>
+			<column name="detailes" type="varchar(1000)" />
+			<column name="delivery_date" type="date" />
+			<column name="boq" type="boolean" />
+			<column name="quantity" type="varchar(100)"></column>
+			<column name="phone_number" type="varchar(50)"></column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseColumnNames="type_of_work_id"
+			baseTableName="request_for_supplier"
+			constraintName="fk_type_of_work_request_for_supplier"
+			referencedColumnNames="id" referencedTableName="type_of_work_needed" />
+		<addForeignKeyConstraint
+			baseColumnNames="project_type_id"
+			baseTableName="request_for_supplier"
+			constraintName="fk_project_type_request_for_supplier"
+			referencedColumnNames="id" referencedTableName="project_type" />
+
+		<addForeignKeyConstraint
+			baseColumnNames="project_phase_id"
+			baseTableName="request_for_supplier"
+			constraintName="fk_project_phase_request_for_supplier"
+			referencedColumnNames="id" referencedTableName="project_phase" />
+
+		<addForeignKeyConstraint
+			baseColumnNames="pic_uplaods_id" baseTableName="request_for_supplier"
+			constraintName="fk_pic_uplaods_request_for_supplier"
+			referencedColumnNames="id" referencedTableName="uploads" />
+
+		<addForeignKeyConstraint
+			baseColumnNames="boq_uplaods_id" baseTableName="request_for_supplier"
+			constraintName="fk_boq_uplaods_request_for_supplier"
+			referencedColumnNames="id" referencedTableName="uploads" />
+
+		<addForeignKeyConstraint
+			baseColumnNames="user_id" baseTableName="request_for_supplier"
+			constraintName="fk_request_for_supplier_user_id"
+			referencedColumnNames="id" referencedTableName="jhi_user" />
+
+
+
+	</changeSet>
+
+</databaseChangeLog>

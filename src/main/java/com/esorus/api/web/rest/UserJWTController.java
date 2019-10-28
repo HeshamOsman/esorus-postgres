@@ -36,8 +36,13 @@ public class UserJWTController {
     @PostMapping("/authenticate")
     public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginVM loginVM) {
 
+    	String authenticateWith = loginVM.getEmail()==null?loginVM.getUsername():loginVM.getEmail();
+    	if(authenticateWith==null||authenticateWith.trim().isEmpty()) {
+    		return ResponseEntity.badRequest().build();
+    	}
+    	
         UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken(loginVM.getUsername(), loginVM.getPassword());
+            new UsernamePasswordAuthenticationToken(authenticateWith.toLowerCase(), loginVM.getPassword());
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);

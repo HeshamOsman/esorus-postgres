@@ -12,9 +12,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import com.esorus.api.domain.User;
+import com.esorus.api.repository.UserRepository;
 
 import io.github.jhipster.config.JHipsterProperties;
 import io.jsonwebtoken.*;
@@ -30,14 +32,18 @@ public class TokenProvider implements InitializingBean {
 
     private Key key;
 
+    
+    private final UserRepository userRepository;
+    
     private long tokenValidityInMilliseconds;
 
     private long tokenValidityInMillisecondsForRememberMe;
 
     private final JHipsterProperties jHipsterProperties;
 
-    public TokenProvider(JHipsterProperties jHipsterProperties) {
+    public TokenProvider(JHipsterProperties jHipsterProperties,UserRepository userRepository) {
         this.jHipsterProperties = jHipsterProperties;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -60,11 +66,14 @@ public class TokenProvider implements InitializingBean {
                 .getTokenValidityInSecondsForRememberMe();
     }
 
-    public String createToken(Authentication authentication, boolean rememberMe) {
+    public String createToken(Authentication authentication ,boolean rememberMe) {
         String authorities = authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.joining(","));
-
+        
+        User user = userRepository.findOneByLogin(authentication.getName()).get(); 
+        
+        
         long now = (new Date()).getTime();
         Date validity;
         if (rememberMe) {
@@ -76,6 +85,11 @@ public class TokenProvider implements InitializingBean {
         return Jwts.builder()
             .setSubject(authentication.getName())
             .claim(AUTHORITIES_KEY, authorities)
+            .claim("email", user.getEmail())
+            .claim("name", user.getFirstName())
+//            .claim("lastName", user.getLastName())
+            .claim("lang", user.getLangKey())
+            .claim("active", user.getActivated())
             .signWith(key, SignatureAlgorithm.HS512)
             .setExpiration(validity)
             .compact();
@@ -92,7 +106,7 @@ public class TokenProvider implements InitializingBean {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        User principal = new User(claims.getSubject(), "", authorities);
+        org.springframework.security.core.userdetails.User principal = new org.springframework.security.core.userdetails.User(claims.getSubject(), "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }

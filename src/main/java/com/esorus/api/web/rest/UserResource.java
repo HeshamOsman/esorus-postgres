@@ -3,6 +3,7 @@ package com.esorus.api.web.rest;
 import com.esorus.api.config.Constants;
 import com.esorus.api.domain.User;
 import com.esorus.api.repository.UserRepository;
+//import com.esorus.api.repository.search.UserSearchRepository;
 import com.esorus.api.security.AuthoritiesConstants;
 import com.esorus.api.service.MailService;
 import com.esorus.api.service.UserService;
@@ -31,6 +32,10 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+//import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing users.
@@ -71,11 +76,14 @@ public class UserResource {
 
     private final MailService mailService;
 
+//    private final UserSearchRepository userSearchRepository;
+
     public UserResource(UserService userService, UserRepository userRepository, MailService mailService) {
 
         this.userService = userService;
         this.userRepository = userRepository;
         this.mailService = mailService;
+//        this.userSearchRepository = userSearchRepository;
     }
 
     /**
@@ -143,6 +151,7 @@ public class UserResource {
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body all users.
      */
+    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
     @GetMapping("/users")
     public ResponseEntity<List<UserDTO>> getAllUsers(Pageable pageable) {
         final Page<UserDTO> page = userService.getAllManagedUsers(pageable);
@@ -187,4 +196,17 @@ public class UserResource {
         userService.deleteUser(login);
         return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName,  "userManagement.deleted", login)).build();
     }
+
+    /**
+     * {@code SEARCH /_search/users/:query} : search for the User corresponding to the query.
+     *
+     * @param query the query to search.
+     * @return the result of the search.
+     */
+//    @GetMapping("/_search/users/{query}")
+//    public List<User> search(@PathVariable String query) {
+//        return StreamSupport
+//            .stream(userSearchRepository.search(queryStringQuery(query)).spliterator(), false)
+//            .collect(Collectors.toList());
+//    }
 }
