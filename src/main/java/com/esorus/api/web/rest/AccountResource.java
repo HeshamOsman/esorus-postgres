@@ -15,6 +15,7 @@ import com.esorus.api.web.rest.vm.ManagedUserVM;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,7 +41,9 @@ public class AccountResource {
     private final UserRepository userRepository;
 
     private final UserService userService;
-
+    @Autowired
+    private org.springframework.core.env.Environment environment;
+    
     private final MailService mailService;
 
     public AccountResource(UserRepository userRepository, UserService userService, MailService mailService) {
@@ -66,6 +69,13 @@ public class AccountResource {
         }
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
         mailService.sendActivationEmail(user);
+        
+        String[] activeProfiles = environment.getActiveProfiles();      // it will return String Array of all active profile.  
+        for(String profile:activeProfiles) {
+            System.out.print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+profile);
+        }
+
+        
     }
 
     /**
