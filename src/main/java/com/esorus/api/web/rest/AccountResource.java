@@ -71,10 +71,6 @@ public class AccountResource {
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
         mailService.sendActivationEmail(user);
         
-        String[] activeProfiles = environment.getActiveProfiles();      // it will return String Array of all active profile.  
-        for(String profile:activeProfiles) {
-            System.out.print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+profile);
-        }
 
         
     }
