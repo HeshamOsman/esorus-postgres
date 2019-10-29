@@ -56,19 +56,28 @@ spring:
   # Replace by 'prod, faker' to add the faker context and have sample data loaded in production
   liquibase:
     contexts: prod
+#  mail:
+#    host: smtp.google.com
+#    port: 587
+#    username: hesham.osman28@gmail.com
+#    password: hesham016998940928
+#    properties: 
+#      mail:
+#         smtp:
+#           auth: true
+#           connectiontimeout: 5000
+#           timeout: 5000
+#           writetimeout: 5000
+#           starttls.enable: true
   mail:
-    host: smtp.google.com
-    port: 587
-    username: hesham.osman28@gmail.com
-    password: hesham016998940928
-    properties: 
-      mail:
-         smtp:
-           auth: true
-           connectiontimeout: 5000
-           timeout: 5000
-           writetimeout: 5000
-           starttls.enable: true
+     host: smtp.postmarkapp.com
+     port: 587
+     username: 53c7709e-5c63-4ea0-8ca1-65838b7fe348
+     password: 53c7709e-5c63-4ea0-8ca1-65838b7fe348
+     protocol: smtp
+#        tls: true
+     properties.mail.smtp:
+            auth: true
   thymeleaf:
     cache: true
 
