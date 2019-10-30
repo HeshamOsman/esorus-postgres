@@ -63,6 +63,10 @@ spring:
     # Otherwise, it will be filled in by maven when building the JAR file
     # Either way, it can be overridden by `--spring.profiles.active` value passed in the commandline or `-Dspring.profiles.active` set in `JAVA_OPTS`
     active: #spring.profiles.active#
+  servlet:
+    multipart:
+         max-file-size: 10MB # Max file size.
+         max-request-size: 15MB # Max request size.
   jmx:
     enabled: false
   data:

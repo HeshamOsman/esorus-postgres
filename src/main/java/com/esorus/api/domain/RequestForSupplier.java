@@ -33,6 +33,10 @@ public class RequestForSupplier implements Serializable{
 	    private Long id;
 	    @NotNull
 	    @ManyToOne
+	    @JoinColumn(name = "professional_role_id")
+	    private ProfessionalRole professionalRole;
+	    @NotNull
+	    @ManyToOne
 	    @JoinColumn(name = "type_of_work_id")
 	    private TypeOfWorkNeeded typeOfWorkNeeded;
 	    @NotNull
@@ -125,6 +129,16 @@ public class RequestForSupplier implements Serializable{
 
 		public void setUploadedBOQ(Uploads uploadedBOQ) {
 			this.uploadedBOQ = uploadedBOQ;
+		}
+		
+		
+
+		public ProfessionalRole getProfessionalRole() {
+			return professionalRole;
+		}
+
+		public void setProfessionalRole(ProfessionalRole professionalRole) {
+			this.professionalRole = professionalRole;
 		}
 
 		public LocalDate getDeliveryDate() {

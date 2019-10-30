@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.esorus.api.domain.ProfessionalRole;
 import com.esorus.api.domain.ProjectPhase;
 import com.esorus.api.domain.ProjectType;
 import com.esorus.api.domain.RequestForSupplier;
 import com.esorus.api.domain.TypeOfWorkNeeded;
 import com.esorus.api.domain.Uploads;
 import com.esorus.api.domain.User;
+import com.esorus.api.repository.ProfessionalRoleRepository;
 import com.esorus.api.repository.ProjectPhaseRepository;
 import com.esorus.api.repository.ProjectTypeRepository;
 import com.esorus.api.repository.RequestForSupplierRepository;
@@ -42,6 +44,9 @@ public class RequestForSupplierService {
 	private ProjectTypeRepository projectTypeRepository;
 	
 	@Autowired
+	private ProfessionalRoleRepository professionalRoleRepository;
+	
+	@Autowired
 	private TypeOfWorkNeededRepository typeOfWorkNeededRepository;
 	
 	public Optional<RequestForSupplier> save(RequestForSupplierDTO requestForSupplierDTO){
@@ -58,6 +63,7 @@ public class RequestForSupplierService {
 		requestForSupplier.setDeliveryDate(requestForSupplierDTO.getDeliveryDate());
 		requestForSupplier.setDetailes(requestForSupplierDTO.getDetailes());
 		requestForSupplier.setPhoneNumber(requestForSupplierDTO.getPhoneNumber());
+		Optional<ProfessionalRole> pr= professionalRoleRepository.findOneBySlug(requestForSupplierDTO.getProfessionalRole());
 		Optional<ProjectPhase> pp= projectPhaseRepository.findOneBySlug(requestForSupplierDTO.getProjectPhase());
 		Optional<ProjectType> pt= projectTypeRepository.findOneBySlug(requestForSupplierDTO.getProjectType());
 		Optional<TypeOfWorkNeeded> town= typeOfWorkNeededRepository.findOneBySlug(requestForSupplierDTO.getTypeOfWorkNeeded());
@@ -70,6 +76,9 @@ public class RequestForSupplierService {
 			return tempraryUploadResponse;
 		if(!town.isPresent())
 			return tempraryUploadResponse;
+		if(!pr.isPresent())
+			return tempraryUploadResponse;
+		requestForSupplier.setProfessionalRole(pr.get());
 		requestForSupplier.setProjectPhase(pp.get());
 		requestForSupplier.setProjectType(pt.get());
 		requestForSupplier.setQuantity(requestForSupplierDTO.getQuantity());

@@ -9,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 
 public class RequestForSupplierDTO {
-
+	@NotBlank
+	private String professionalRole;
 	@NotBlank
 	private String typeOfWorkNeeded;
 	@NotBlank
@@ -38,6 +39,16 @@ public class RequestForSupplierDTO {
 
 	public void setTypeOfWorkNeeded(String typeOfWorkNeeded) {
 		this.typeOfWorkNeeded = typeOfWorkNeeded;
+	}
+
+	
+	
+	public String getProfessionalRole() {
+		return professionalRole;
+	}
+
+	public void setProfessionalRole(String professionalRole) {
+		this.professionalRole = professionalRole;
 	}
 
 	public String getProjectType() {
