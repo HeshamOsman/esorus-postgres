@@ -66,6 +66,9 @@ public class RequestForSupplier implements Serializable{
 	    @Column(name="detailes")
 	    private String detailes;
 	    
+	    @Column(name="special")
+	    private String special;
+	    
 	    @Column(name="quantity")
 	    private String quantity;
 	    
@@ -151,6 +154,14 @@ public class RequestForSupplier implements Serializable{
 
 		public String getDetailes() {
 			return detailes;
+		}
+
+		public String getSpecial() {
+			return special;
+		}
+
+		public void setSpecial(String special) {
+			this.special = special;
 		}
 
 		public void setDetailes(String detailes) {

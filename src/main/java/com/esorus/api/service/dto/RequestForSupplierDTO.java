@@ -30,6 +30,8 @@ public class RequestForSupplierDTO {
 	private String quantity;
     @NotNull
 	private Boolean boq;
+    
+    private String special;
 
 	private String phoneNumber;
 
@@ -43,6 +45,14 @@ public class RequestForSupplierDTO {
 
 	
 	
+	public String getSpecial() {
+		return special;
+	}
+
+	public void setSpecial(String special) {
+		this.special = special;
+	}
+
 	public String getProfessionalRole() {
 		return professionalRole;
 	}

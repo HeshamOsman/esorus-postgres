@@ -33,10 +33,11 @@ public class UploadsResource {
 	
 	@PostMapping("/upload-files")
 	@PreAuthorize("hasRole(\"" + AuthoritiesConstants.PROFESSIONAL_BUYER + "\")")
-	public ResponseEntity<FileInfoVM> saveTempraryFile(@RequestParam("file") MultipartFile file) {
+	public ResponseEntity<FileInfoVM> saveTempraryFile(@RequestParam("file") MultipartFile file,
+			@RequestParam("type")String type) {
 
 		try {
-			Optional<FileInfoVM> uploadServiceResponse = uploadsService.saveTemporaryFile(file, "buyer_request");
+			Optional<FileInfoVM> uploadServiceResponse = uploadsService.saveTemporaryFile(file, type.equals("boq")?"boq":"buyer_request");
 			if (uploadServiceResponse.isPresent())
 				return ResponseEntity.ok(uploadServiceResponse.get());
 			else

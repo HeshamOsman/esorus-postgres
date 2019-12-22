@@ -63,12 +63,16 @@ public class RequestForSupplierService {
 		requestForSupplier.setDeliveryDate(requestForSupplierDTO.getDeliveryDate());
 		requestForSupplier.setDetailes(requestForSupplierDTO.getDetailes());
 		requestForSupplier.setPhoneNumber(requestForSupplierDTO.getPhoneNumber());
+		requestForSupplier.setSpecial(requestForSupplierDTO.getSpecial());
 		Optional<ProfessionalRole> pr= professionalRoleRepository.findOneBySlug(requestForSupplierDTO.getProfessionalRole());
 		Optional<ProjectPhase> pp= projectPhaseRepository.findOneBySlug(requestForSupplierDTO.getProjectPhase());
 		Optional<ProjectType> pt= projectTypeRepository.findOneBySlug(requestForSupplierDTO.getProjectType());
 		Optional<TypeOfWorkNeeded> town= typeOfWorkNeededRepository.findOneBySlug(requestForSupplierDTO.getTypeOfWorkNeeded());
 		Optional<Uploads> pic = uploadsRepository.findOneBySavedFileName(requestForSupplierDTO.getUploadedPic());
+		Optional<Uploads> boqpic = uploadsRepository.findOneBySavedFileName(requestForSupplierDTO.getUploadedBOQ());
 		if(pic.isPresent()&&!pic.get().getUser().getEmail().equals(currentUser.getEmail()))
+			return tempraryUploadResponse;
+		if(boqpic.isPresent()&&!boqpic.get().getUser().getEmail().equals(currentUser.getEmail()))
 			return tempraryUploadResponse;
 		if(!pp.isPresent())
 			return tempraryUploadResponse;
@@ -84,6 +88,7 @@ public class RequestForSupplierService {
 		requestForSupplier.setQuantity(requestForSupplierDTO.getQuantity());
 		requestForSupplier.setTypeOfWorkNeeded(town.get());
 		requestForSupplier.setUploadedPic(pic.isPresent()?pic.get():null);
+		requestForSupplier.setUploadedBOQ(boqpic.isPresent()?boqpic.get():null);
 		requestForSupplier.setUser(currentUser);
 		requestForSupplier = requestForSupplierRepository.save(requestForSupplier);
 		tempraryUploadResponse = Optional.of(requestForSupplier);
