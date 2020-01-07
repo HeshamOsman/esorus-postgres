@@ -209,6 +209,11 @@ public class MailService {
 			if (auth.getName().equals(AuthoritiesConstants.PROFESSIONAL_BUYER)) {
 				sendEmailFromTemplate(user, "mail/activationEmailForProffesionalBuyer", "email.buy.activation.title",
 						"esorus-black", new ByteArrayResource(fileBytes));
+				
+				sendEmailFromTemplate(user, configsRepository.findOneByKey("admin_email").get().getValue(),
+						"mail/professionalBuyerRegistered", "email.admin.buy.activation.title", "esorus-black",
+						new ByteArrayResource(fileBytes));
+				
 				return;
 			}
 			if (auth.getName().equals(AuthoritiesConstants.SUPPLIER)) {
